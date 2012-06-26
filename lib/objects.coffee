@@ -2,7 +2,6 @@ _          = require "underscore"
 objectDiff = require "objectdiff"
 
 
-
 classToType = {}
 for name in "Boolean Number String Function Array Date RegExp".split(" ")
   classToType["[object " + name + "]"] = name.toLowerCase()
@@ -27,6 +26,7 @@ exports.plainProperties = (object) ->
     attributes[attribute] = value
   return attributes  
 
+# Find differences between two objects.
 exports.diff = (object1, object2) ->
   changes = objectDiff.diff object1, object2
   diffs = []
@@ -38,16 +38,12 @@ exports.diff = (object1, object2) ->
     diffs.push diff
   return diffs
 
-
-
-
-# **merge** - Deep Object Extension (merge)
-#    *  USAGE: mergedObject = objectUtils.merge(grandparent, child, grandchild, greatgrandchild)
+#  Deep object extension (merge).
+#  Usage: mergedObject = objects.merge(grandparent, child, grandchild, greatgrandchild)
 #    1. Priority of objects is right-to-left; first param is overwritten by second param, etc...
 #    2. Based conceptually on the _.extend() function in underscore.js ( http://documentcloud.github.com/underscore/#extend )
 #    3. From deepExtend gist by author: Kurt Milam - http://xioup.com
-#    4. https://gist.github.com/1868955
-# + *firstParam* - Parameter description and notes  
+#    4. https://gist.github.com/1868955 
 exports.merge = (obj) ->
   parentRE = /#{\s*?_\s*?}/
   slice = Array.prototype.slice
@@ -77,7 +73,7 @@ exports.merge = (obj) ->
   
   return obj
 
-# Deep Clone
+# Deep clone
 exports.clone = (obj) ->
   if not obj? or typeof obj isnt 'object'
     return obj
