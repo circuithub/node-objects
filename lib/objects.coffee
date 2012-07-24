@@ -96,7 +96,16 @@ exports.clone = (obj) ->
 
   return newInstance
 
-
+#   Find a specific object in an array of objects where a specific property equals a specific value.
+#   Usage: theContainedObject = objects.find(myArray, "id", 4)
+#   Notes: 
+#       1. Pass by reference - objects are reference in, reference out (deep copy, see clone(..), the return value if so desired)
+#       2. Short circuit analysis - returns only the first object found in array index ascending order 
+exports.find = (array, property, value) ->
+  for i in [0...array.length]
+    if (array[i][property] == value)
+      return array[i]
+  throw "Couldn't find object with #{property}: " + value
 
 
 
