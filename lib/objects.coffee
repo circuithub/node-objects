@@ -107,6 +107,18 @@ exports.find = (array, property, value) ->
     if (array[i][property] == value)
       return array[i]
   return undefined
+  
+#   Find a specific object in an array of objects where a specific property equals a specific value.
+#     Returns undefined if not found. Returns the index of the location otherwise.
+#   Usage: theContainedObject = objects.findIndex(myArray, "id", 4)
+#   Notes: 
+#       1. Pass by reference - objects are reference in, reference out (deep copy, see clone(..), the return value if so desired)
+#       2. Short circuit analysis - returns only the first object found in array index ascending order 
+exports.findIndex = (array, property, value) ->
+  for i in [0...array.length]
+    if (array[i][property] == value)
+      return i
+  return undefined
 
 
 
