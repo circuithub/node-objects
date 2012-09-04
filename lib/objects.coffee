@@ -1,4 +1,5 @@
 _          = require "underscore"
+_s         = require "underscore.string"
 objectDiff = require "objectdiff"
 
 
@@ -120,8 +121,13 @@ exports.findIndex = (array, property, value) ->
       return i
   return undefined
 
-
-
-
-
-
+#   Add a prefix to the name of all properties of an Object. Useful for avoiding collisions when merging/extending objects.
+#   Follows lowerCamel convention
+exports.prefix = (theObject, prefix) ->
+  newObject = {}
+  for eachProperty of theObject
+    if eachProperty is "id"
+      newObject[prefix + "ID"] = theObject["id"]
+    else
+      newObject[prefix + _s.capitalize eachProperty] = theObject[eachProperty]
+  return newObject
