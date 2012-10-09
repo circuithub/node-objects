@@ -11,7 +11,7 @@
   "dependencies": {
     "coffee-script": ">=1.3.3",
     "underscore": ">=1.3.3",
-    "underscore.string": "git+ssh://git@github.com:epeli/underscore.string.git#master",
+    "underscore.string": "git+http://github.com/epeli/underscore.string.git#master",
     "objectdiff": ">=1.0.0"
   },
   "devDependencies": {
