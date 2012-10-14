@@ -27,6 +27,28 @@ exports.plainProperties = (object) ->
     attributes[attribute] = value
   return attributes  
 
+# Removes all functions from keys (deep search)
+# Cannot handle circlar references
+exports.purgeFunctions = (object) =>
+  #deep clone object, then lets cut it up
+  _object = @clone object  
+  _purgeFunctions _object, 0
+  return _object
+
+#helper function -- works via side-effects using pass-by-reference
+#index i is just for debugging, if desired
+_purgeFunctions = (object, i) =>
+  return if not object?
+  return if Object.keys(object).length is 0   
+  for attribute, value of object
+    switch @type value
+      when "object"
+        _purgeFunctions value, i+1
+      when "function"
+        object[attribute] = undefined
+  return i
+
+
 # Find differences between two objects.
 exports.diff = (object1, object2) ->
   changes = objectDiff.diff object1, object2
