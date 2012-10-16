@@ -28,7 +28,7 @@ That's easy!
 ## Subtraction (Change Log)
 
 ```coffeescript
-a = {
+  a = {
     aa: 2
     ab: {a:1, c:3}
   }
@@ -43,6 +43,7 @@ results in a return object of:
 
 ```coffeescript
 {
+    added: {}
     changed: { aa: 2 }
     removed: { ab: { b: 2 } }
     numChanged: 
