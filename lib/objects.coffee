@@ -48,10 +48,87 @@ _purgeFunctions = (object, i) =>
         object[attribute] = undefined
   return i
 
+#implements: objectC (return value) = objectA - objectB; e.g. objectA = merge(ObjectB, ObjectC)
+#deep (recursive) implementation; avoid circular references; Does not handle function properties;
+#numChanged does not include the number deleted/removed
+exports.subtract = (objectA, objectB) =>
+  objectC = {}
+  numChanges = _subtract(objectA, objectB, objectC)
+  console.log "\n\n\n=-=-=[subtract][add/modify][#{numChanges}]", objectC, "\n\n\n"
+  console.log "\n\n\n=-=-=[subtract][deleted][#{numChanges}]", objectB, "\n\n\n"
+  return {
+    changed: objectC
+    removed: objectB
+    numChanged: numChanges
+  }
+  #[STEP 1] Identify modifications and additions made to B to produce A
+  #[STEP 2] Indentify properties deleted from B that, therefore, don't appear in A
+
+
+# Helper function
+# -- returns number of changes found
+# -- A = new one; B = original one
+_subtract = (objectA, objectB, objectC) =>
+  numChanges = {
+    add: 0
+    modify: 0
+    removed: 0
+    total: 0
+  }
+  # [FOR A] -- iterate over the properties of A (find added and modified)
+  for attribute, value of objectA
+    if objectB[attribute]?
+      #both A and B has this attribute defined
+      switch @type value
+        when "object"
+          #need to recursive compare (deep analysis)
+          objectC[attribute] = {} #enable recursion
+          numChangesInObject = _subtract objectA[attribute], objectB[attribute], objectC[attribute]
+          #accumulate changes
+          numChanges[counter] += numChangesInObject[counter] for counter of numChanges
+          #cleanup -- don't report when nothing changed
+          delete objectB[attribute] if numChangesInObject.removed is 0
+          delete objectC[attribute] if numChangesInObject.add+numChangesInObject.modify is 0
+        when "function"
+          #ignore this, we don't support function comparison
+          console.log "WARNING: Function attributes not supported."
+          delete objectB[attribute]     
+        when "array"          
+          if _.difference(value, objectB[attribute]).length isnt 0
+            # [MODIFIED] -- value was changed
+            #TODO, implement better array comparison: need to check ordering, deal with element-by-element changes
+            objectC[attribute] = value
+            numChanges.modify++
+          delete objectB[attribute]  # This doesn't allow for support of Arrays-of-Objects; TODO: add support
+        else
+          # rely on javascript comparisons for everything else
+          if value isnt objectB[attribute]
+            # [MODIFIED] -- value was changed
+            objectC[attribute] = value
+            numChanges.modify++ 
+          delete objectB[attribute]     
+    else
+      # [ADDED] -- new attribute was added (In A, but not in B)
+      objectC[attribute] = value
+      numChanges.add++
+  # [FOR B] -- iterate over the properties of B (find removed)
+  for attribute, value of objectB
+    if not objectA[attribute]?
+      # [DELETED] -- attribute was removed
+      numChanges.removed++
+  # [TOTAL] -- add it up and report it back! =)
+  numChanges.total = numChanges.add + numChanges.modify + numChanges.removed 
+  return numChanges
 
 # Find differences between two objects.
 exports.diff = (object1, object2) ->
+
+  console.log "\n\n\n=-=-=[objects.diff]", "", "\n\n\n" #xxx
+
   changes = objectDiff.diff object1, object2
+
+  console.log "\n\n\n=-=-=[objects.diff]", changes, "\n\n\n" #xxx
+    
   diffs = []
   for changeName, change of changes when change.changed != "equals" and changeName != "id"
     diff = 
