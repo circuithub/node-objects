@@ -224,3 +224,7 @@ exports.prefix = (theObject, prefix) ->
     else
       newObject[prefix + _s.capitalize eachProperty] = theObject[eachProperty]
   return newObject
+
+#   Pretty print an object to disk. Useful for deep visualization/inspection during development/test.
+exports.write = (theObject, filename) ->
+  fs.writeFileSync filename, JSON.stringify theObject, undefined, "\t"
