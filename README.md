@@ -25,6 +25,36 @@ objects = require "objects"
 
 That's easy!
 
+## Subtraction (Change Log)
+
+```coffeescript
+  a = {
+    aa: 2
+    ab: {a:1, c:3}
+  }
+  b = {
+    aa: 1
+    ab: {a:1, b:2, c:3}
+  }
+  objects.subtract a, b
+```
+
+results in a return object of:
+
+```coffeescript
+{
+    added: {}
+    changed: { aa: 2 }
+    removed: { ab: { b: 2 } }
+    numChanged: 
+      {
+        add: 0
+        modify: 1
+        removed: 1
+        total: 2
+      }
+}
+```
 
 ## Contributions
 

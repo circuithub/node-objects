@@ -27,9 +27,102 @@ exports.plainProperties = (object) ->
     attributes[attribute] = value
   return attributes  
 
+# Removes all functions from keys (deep search)
+# Cannot handle circlar references
+exports.purgeFunctions = (object) =>
+  #deep clone object, then lets cut it up
+  _object = @clone object  
+  _purgeFunctions _object, 0
+  return _object
+
+#helper function -- works via side-effects using pass-by-reference
+#index i is just for debugging, if desired
+_purgeFunctions = (object, i) =>
+  return if not object?
+  return if Object.keys(object).length is 0   
+  for attribute, value of object
+    switch @type value
+      when "object"
+        _purgeFunctions value, i+1
+      when "function"
+        object[attribute] = undefined
+  return i
+
+# Object Subtraction -- The list of changes (change log) in moving from Object B to Object A
+#     Implements: (return value) = objectA - objectB; e.g. objectA = merge(ObjectB, ObjectC) 
+#     Array property handling is present, but weak at the moment. 
+#     deep (recursive) implementation; avoid circular references; Does not handle function properties;
+exports.subtract = (objectA, objectB) =>
+  objectAdd = {}
+  objectModify = {}
+  numChanges = _subtract(objectA, objectB, objectAdd, objectModify)
+  return {
+    added: objectAdd
+    changed: objectModify
+    removed: objectB
+    numChanged: numChanges
+  }
+
+# Helper function
+# -- returns number of changes found
+# -- A = new one; B = original one; e.g. A - B
+_subtract = (objectA, objectB, objectAdd, objectModify) =>
+  numChanges = {
+    add: 0
+    modify: 0
+    removed: 0
+    total: 0
+  }
+  # [FOR A] -- iterate over the properties of A (find added and modified)
+  for attribute, value of objectA
+    if objectB[attribute]?
+      #both A and B has this attribute defined
+      switch @type value
+        when "object"
+          #need to recursive compare (deep analysis)
+          objectAdd[attribute] = {} #enable recursion
+          objectModify[attribute] = {}
+          numChangesInObject = _subtract objectA[attribute], objectB[attribute], objectAdd[attribute], objectModify[attribute]
+          #accumulate changes
+          numChanges[counter] += numChangesInObject[counter] for counter of numChanges
+          #cleanup -- don't report when nothing changed
+          delete objectB[attribute] if numChangesInObject.removed is 0
+          delete objectAdd[attribute] if numChangesInObject.add is 0
+          delete objectModify[attribute] if numChangesInObject.modify is 0
+        when "function"
+          #ignore this, we don't support function comparison
+          console.log "WARNING: Function attributes not supported."
+          delete objectB[attribute]     
+        when "array"          
+          if _.difference(value, objectB[attribute]).length isnt 0
+            # [MODIFIED] -- value was changed
+            #TODO, implement better array comparison: need to check ordering, deal with element-by-element changes
+            objectModify[attribute] = value
+            numChanges.modify++
+          delete objectB[attribute]  # This doesn't allow for support of Arrays-of-Objects; TODO: add support
+        else
+          # rely on javascript comparisons for everything else
+          if value isnt objectB[attribute]
+            # [MODIFIED] -- value was changed
+            objectModify[attribute] = value
+            numChanges.modify++ 
+          delete objectB[attribute]     
+    else
+      # [ADDED] -- new attribute was added (In A, but not in B)
+      objectAdd[attribute] = value
+      numChanges.add++
+  # [FOR B] -- iterate over the properties of B (find removed)
+  for attribute, value of objectB
+    if not objectA[attribute]?
+      # [DELETED] -- attribute was removed
+      numChanges.removed++
+  # [TOTAL] -- add it up and report it back! =)
+  numChanges.total = numChanges.add + numChanges.modify + numChanges.removed 
+  return numChanges
+
 # Find differences between two objects.
 exports.diff = (object1, object2) ->
-  changes = objectDiff.diff object1, object2
+  changes = objectDiff.diff object1, object2    
   diffs = []
   for changeName, change of changes when change.changed != "equals" and changeName != "id"
     diff = 
@@ -131,3 +224,7 @@ exports.prefix = (theObject, prefix) ->
     else
       newObject[prefix + _s.capitalize eachProperty] = theObject[eachProperty]
   return newObject
+
+#   Pretty print an object to disk. Useful for deep visualization/inspection during development/test.
+exports.write = (theObject, filename) ->
+  fs.writeFileSync filename, JSON.stringify theObject, undefined, "\t"
