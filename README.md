@@ -26,7 +26,13 @@ That's easy!
 
 ## type (type of variable)
 
-Report the type of the variable safely as a string.
+Report the type of the variable safely as a string. 
+
+Possible return values:
+
+* ```undefined```, ```null```
+* ```boolean```, ```number```, ```string```, ```function```, ```array```, ```date```, ```regexp```
+* ```object```
 
 ```coffeescript
 exports.type = (obj) ->
