@@ -16,16 +16,129 @@ Install
 
 Code
 
-``` coffee
-
+```coffeescript
 objects = require "objects"
-
-
 ```
 
 That's easy!
 
-## Subtraction (Change Log)
+# The Library
+
+## type (type of variable)
+
+Report the type of the variable safely as a string.
+
+```coffeescript
+exports.type = (obj) ->
+```
+
+## mergeArrays
+
+Merge two array into one.
+
+```
+exports.mergeArrays = (first, second) -> Array::push.apply first, second
+```
+
+## plainProperties
+
+Get only plain properties from object and skip nested objects.
+
+```
+exports.plainProperties = (object) ->
+```
+
+## purgeFunctions
+
+Removes all functions from keys (deep search)
+
+* Cannot handle circlar references
+* Internal deep clone (returns a new object, non-destructive to original)
+
+```
+exports.purgeFunctions = (object) =>
+```
+
+## diff (object difference, see subtract for changelog)
+
+* Find differences between two objects.
+
+```coffeescript
+exports.diff = (object1, object2) ->
+```
+
+## merge (deep extend)
+
+Deep object extension (merge).
+
+* Priority of objects is right-to-left; first param is overwritten by second param, etc...
+* Based conceptually on the _.extend() function in underscore.js ( http://documentcloud.github.com/underscore/#extend )
+* From deepExtend gist by author: Kurt Milam - http://xioup.com
+* https://gist.github.com/1868955 
+
+```coffeescript
+mergedObject = objects.merge(grandparent, child, grandchild, greatgrandchild)
+```
+
+## clone (deep copy)
+
+Deep clone
+
+```coffeescript
+exports.clone = (obj) ->
+```
+
+## find
+
+Find a specific object in an array of objects where a specific property equals a specific value.
+
+* Returns undefined if not found.
+* Pass by reference - objects are reference in, reference out (deep copy, see clone(..), the return value if so desired)
+* Short circuit analysis - returns only the first object found in array index ascending order 
+
+Usage: theContainedObject = objects.find(myArray, "id", 4)
+
+```coffeescript
+exports.find = (array, property, value) ->
+```
+
+## findIndex
+
+Find a specific object in an array of objects where a specific property equals a specific value.
+
+* Returns undefined if not found. Returns the index of the location otherwise.
+* Pass by reference - objects are reference in, reference out (deep copy, see clone(..), the return value if so desired)
+* Short circuit analysis - returns only the first object found in array index ascending order 
+       
+Usage: theContainedObject = objects.findIndex(myArray, "id", 4)
+
+```coffeescript
+exports.findIndex = (array, property, value) ->
+```
+
+## prefix
+
+Add a prefix to the name of all properties of an Object. 
+
+* Useful for avoiding collisions when merging/extending objects. 
+* Follows lowerCamel convention
+
+```coffeescript
+exports.prefix = (theObject, prefix) ->
+```
+
+## write
+
+Pretty print an object to disk. 
+
+* Useful for deep visualization/inspection during development/test.
+
+```coffeescript
+exports.write = (theObject, filename) ->
+  fs.writeFileSync filename, JSON.stringify theObject, undefined, "\t"
+```
+
+## subtract (Change Log)
 
 ```coffeescript
   a = {
@@ -56,7 +169,7 @@ results in a return object of:
 }
 ```
 
-## Contributions
+# Contributions
 
 If you need any feature tell us or fork project and implement it by yourself.
 
