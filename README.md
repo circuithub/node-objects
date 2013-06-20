@@ -144,6 +144,16 @@ exports.write = (theObject, filename) ->
   fs.writeFileSync filename, JSON.stringify theObject, undefined, "\t"
 ```
 
+## stringify
+
+Object to JSON string
+
+* Handles error objects that get mangled by JSON.stringify
+
+```coffeescript
+exports.stringify = (theObject) ->
+```
+
 ## subtract (Change Log)
 
 ```coffeescript
