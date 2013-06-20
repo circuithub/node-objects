@@ -228,3 +228,15 @@ exports.prefix = (theObject, prefix) ->
 #   Pretty print an object to disk. Useful for deep visualization/inspection during development/test.
 exports.write = (theObject, filename) ->
   fs.writeFileSync filename, JSON.stringify theObject, undefined, "\t"
+
+###
+  Object to JSON string
+  -- Handles error objects that get mangled by JSON.stringify
+###
+exports.stringify = (theObject) ->
+  str = "{"
+  for key, value of theObject
+    str += "\"#{key}\":\"#{value}\","
+  str = str[0...str.length]
+  str += "}"
+  return str
