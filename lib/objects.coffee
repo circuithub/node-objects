@@ -234,9 +234,11 @@ exports.write = (theObject, filename) ->
   -- Handles error objects that get mangled by JSON.stringify
 ###
 exports.stringify = (theObject) ->
+  numKeys = 0
   str = "{"
   for key, value of theObject
+    numKeys++
     str += "\"#{key}\":\"#{value}\","
-  str = str[0...str.length]
+  str = str[0...str.length-1] if numKeys > 0
   str += "}"
   return str
