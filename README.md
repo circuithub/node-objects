@@ -73,6 +73,42 @@ exports.purgeFunctions = (object) =>
 exports.diff = (object1, object2) ->
 ```
 
+## subtract (Change Log)
+
+* Find and characterize the differences between two objects
+* Report polarity is oriented such that A = new state and B = prior state (e.g. A - B) 
+* Report identifies the changes that need to be applied to the prior state (B) to reach the new state (A)
+* A-B=C --> B+C=A; A = new state, B = prior state, C = results from subtract(A,B) 
+
+```coffeescript
+  a = {
+    aa: 2
+    ab: {a:1, c:3}
+  }
+  b = {
+    aa: 1
+    ab: {a:1, b:2, c:3}
+  }
+  objects.subtract a, b
+```
+
+results in a return object of:
+
+```coffeescript
+{
+    added: {}
+    changed: { aa: 2 }
+    removed: { ab: { b: 2 } }
+    numChanged: 
+      {
+        add: 0
+        modify: 1
+        removed: 1
+        total: 2
+      }
+}
+```
+
 ## merge (deep extend)
 
 Deep object extension (merge).
@@ -152,37 +188,6 @@ Object to JSON string
 
 ```coffeescript
 exports.stringify = (theObject) ->
-```
-
-## subtract (Change Log)
-
-```coffeescript
-  a = {
-    aa: 2
-    ab: {a:1, c:3}
-  }
-  b = {
-    aa: 1
-    ab: {a:1, b:2, c:3}
-  }
-  objects.subtract a, b
-```
-
-results in a return object of:
-
-```coffeescript
-{
-    added: {}
-    changed: { aa: 2 }
-    removed: { ab: { b: 2 } }
-    numChanged: 
-      {
-        add: 0
-        modify: 1
-        removed: 1
-        total: 2
-      }
-}
 ```
 
 # Contributions

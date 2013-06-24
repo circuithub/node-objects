@@ -52,3 +52,50 @@ describe "#diff", ->
       age: 24
     diffs = objects.diff obj1, obj2    
     diffs.should.have.lengthOf 0
+
+describe "#subtract", ->
+  it "should find example differences", ->
+    a = 
+      aa: 2
+      ab: {a:1, c:3}
+    b = 
+      aa: 1
+      ab: {a:1, b:2, c:3}
+    d = objects.subtract a, b
+    objects.type(d.added).should.eql "object"
+    Object.keys(d.added).length.should.eql 0
+    d.changed.aa.should.eql 2
+    d.removed.ab.b.should.eql 2
+    d.numChanged.add.should.eql 0
+    d.numChanged.modify.should.eql 1
+    d.numChanged.removed.should.eql 1
+    d.numChanged.total.should.eql 2
+  it "should detect changes to undefined values as modifications not additions/deletions", ->
+    a = 
+      aa: {aaa: 1, aab: undefined}
+      ab: 2
+      ac: 3
+    b = 
+      aa: undefined
+    d = objects.subtract a, b
+    console.log "\n\n\n=-=-=[subtract](a-b)", d, "\n\n\n"
+    d.added.ab.should.eql 2
+    d.added.ac.should.eql 3
+    d.changed.aa.aaa.should.eql 1
+  it "should not violate the equality principal: if A-B=C then A-C=B", ->
+    a = 
+      aa: {aaa: 1, aab: undefined}
+      ab: 2
+      ac: 3
+    b = 
+      aa: undefined
+    e = objects.subtract b, a
+    console.log "\n\n\n=-=-=[subtract](b-a)", e, "\n\n\n"
+    e.changed.hasOwnProperty("aa").should.eql true
+    should.equal e.changed.aa? false
+    e.removed.ab.should.eql 2
+    e.removed.ac.should.eql 3
+
+
+
+

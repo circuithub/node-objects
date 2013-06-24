@@ -50,9 +50,11 @@ _purgeFunctions = (object, i) =>
 
 # Object Subtraction -- The list of changes (change log) in moving from Object B to Object A
 #     Implements: (return value) = objectA - objectB; e.g. objectA = merge(ObjectB, ObjectC) 
-#     Array property handling is present, but weak at the moment. 
-#     deep (recursive) implementation; avoid circular references; Does not handle function properties;
-exports.subtract = (objectA, objectB) =>
+#     -- Array property handling is present, but weak at the moment. 
+#     -- Deep (recursive) implementation; avoid circular references.
+#     -- Does not handle function properties.
+exports.subtract = (objectA, _objectB) =>
+  objectB = @clone _objectB
   objectAdd = {}
   objectModify = {}
   numChanges = _subtract(objectA, objectB, objectAdd, objectModify)
@@ -66,7 +68,8 @@ exports.subtract = (objectA, objectB) =>
 # Helper function
 # -- returns number of changes found
 # -- A = new one; B = original one; e.g. A - B
-_subtract = (objectA, objectB, objectAdd, objectModify) =>
+# -- forceModify: when true, will write missing-in-B as a modify rather than add operation -- for handling undefined objects: a={a:undefined}; b={a:{b:1}}
+_subtract = (objectA, objectB, objectAdd, objectModify, forceModify) =>
   numChanges = {
     add: 0
     modify: 0
@@ -75,14 +78,14 @@ _subtract = (objectA, objectB, objectAdd, objectModify) =>
   }
   # [FOR A] -- iterate over the properties of A (find added and modified)
   for attribute, value of objectA
-    if objectB[attribute]?
+    if objectB? and objectB.hasOwnProperty attribute
       #both A and B has this attribute defined
       switch @type value
         when "object"
           #need to recursive compare (deep analysis)
           objectAdd[attribute] = {} #enable recursion
-          objectModify[attribute] = {}
-          numChangesInObject = _subtract objectA[attribute], objectB[attribute], objectAdd[attribute], objectModify[attribute]
+          objectModify[attribute] = {}          
+          numChangesInObject = _subtract objectA[attribute], objectB[attribute], objectAdd[attribute], objectModify[attribute], not objectB[attribute]?
           #accumulate changes
           numChanges[counter] += numChangesInObject[counter] for counter of numChanges
           #cleanup -- don't report when nothing changed
@@ -108,12 +111,17 @@ _subtract = (objectA, objectB, objectAdd, objectModify) =>
             numChanges.modify++ 
           delete objectB[attribute]     
     else
-      # [ADDED] -- new attribute was added (In A, but not in B)
-      objectAdd[attribute] = value
-      numChanges.add++
+      if forceModify
+        # [MODIFY] -- handle undefined objects: a={a:undefined}; b={a:{b:1}}
+        objectModify[attribute] = value
+        numChanges.modify++        
+      else
+        # [ADDED] -- new attribute was added (In A, but not in B)
+        objectAdd[attribute] = value
+        numChanges.add++
   # [FOR B] -- iterate over the properties of B (find removed)
   for attribute, value of objectB
-    if not objectA[attribute]?
+    if not objectA.hasOwnProperty attribute
       # [DELETED] -- attribute was removed
       numChanges.removed++
   # [TOTAL] -- add it up and report it back! =)
