@@ -28,25 +28,11 @@ exports.plainProperties = (object) ->
   return attributes  
 
 # Removes all functions from keys (deep search)
-# Cannot handle circlar references
-exports.purgeFunctions = (object) =>
-  #deep clone object, then lets cut it up
-  _object = @clone object  
-  _purgeFunctions _object, 0
-  return _object
-
-#helper function -- works via side-effects using pass-by-reference
-#index i is just for debugging, if desired
-_purgeFunctions = (object, i) =>
-  return if not object?
-  return if Object.keys(object).length is 0   
-  for attribute, value of object
-    switch @type value
-      when "object"
-        _purgeFunctions value, i+1
-      when "function"
-        object[attribute] = undefined
-  return i
+# -- Cannot handle circlar references
+# -- Implemented by scrubbing through JSON parser
+exports.onlyData = (object) =>
+  intermediateObject = JSON.stringify object
+  return JSON.parse intermediateObject
 
 # Object Subtraction -- The list of changes (change log) in moving from Object B to Object A
 #     Implements: (return value) = objectA - objectB; e.g. objectA = merge(ObjectB, ObjectC) 

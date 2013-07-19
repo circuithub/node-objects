@@ -54,15 +54,15 @@ Get only plain properties from object and skip nested objects.
 exports.plainProperties = (object) ->
 ```
 
-## purgeFunctions
+## onlyData
 
-Removes all functions from keys (deep search)
+Removes all functions (and other non-JSON-safe types) from keys (deep search)
 
 * Cannot handle circlar references
 * Internal deep clone (returns a new object, non-destructive to original)
 
 ```
-exports.purgeFunctions = (object) =>
+exports.onlyData = (object) =>
 ```
 
 ## diff (object difference, see subtract for changelog)
